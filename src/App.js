@@ -25,8 +25,6 @@ Geocode.setLanguage("es");
 // Enable or disable logs. Its optional.
 Geocode.enableDebug();
 
-
-
 function Map() {
   const [selectedCapital, setSelectedCapital] = useState(null);
   const [temp, setTemp] = useState(null);
@@ -53,18 +51,19 @@ function Map() {
     Geocode.fromLatLng(late.toString(), lone.toString()).then(  
         response => {
         const aCs = response.results[0].address_components;
-        const types = aCs.filter((aC) => aC.types[0] =='country');
-        const countryCode = types.shortname;
-        alert(countryCode)
+        const obj = aCs.filter((aC) => aC.types[0] =='country');
+        const countryCode = obj[0]['short_name'];
         const geometryClicked = capitalData.features.filter(
               (item) => item.id === countryCode) //Extract the countrycode 
-        alert(JSON.stringify(geometryClicked));
-        const lat = geometryClicked.coordinates[1]
-        const lon = geometryClicked.coordinates[0]  
-   
+        const lat = geometryClicked[0]['geometry']['coordinates'][1]
+        const lon = geometryClicked[0]['geometry']['coordinates'][0]  
+        
         fetch(`http://localhost:5000/darksky/${lon}/${lat}`)
         .then(res => res.json())
-        .then((data) => this.setState({ temp: data.temperature }))
+        .then((data) => {
+            setTemp(data.temp)  ;
+            setSelectedCapital(geometryClicked[0]);                   
+        })         
         .catch(console.log)       
         },
         error => {
@@ -73,24 +72,10 @@ function Map() {
        );
     };  
     
-    
-   const buscatemp = (capital) =>{
-    const lat = capital.geometry.coordinates[1]
-    const lon = capital.geometry.coordinates[0]  
-   
-      axios.get(`http://localhost:5000/darksky/${lon}/${lat}`)
-    .then(res => {
-       const t = res.data;
-        setTemp(t.temp)  
-       return JSON.stringify(t);
-   }) 
-       
-   }
-    
+  /*  
     const clickOnMarker = (selectedCapital) =>{
     const lat = selectedCapital.geometry.coordinates[1]
     const lon = selectedCapital.geometry.coordinates[0]  
-             
    axios.get(`http://localhost:5000/darksky/${lon}/${lat}`,{ 'Content-Type': 'application/json',crossdomain: true })
     .then(res => {
        const t = res.data;   
@@ -98,8 +83,9 @@ function Map() {
        return t.temp;
 
    })
+   
 };
-    
+   */ 
   return (
     <GoogleMap
       onClick={(e) => handleClick(e)}
@@ -112,6 +98,29 @@ function Map() {
                         gestureHandling: 'none',
           }}      
       >
+        {(selectedCapital )&& (
+        
+        <InfoWindow
+          onCloseClick={() => {
+            setSelectedCapital(null);
+          }}
+          position={{
+            lng: selectedCapital.geometry.coordinates[0],
+            lat: selectedCapital.geometry.coordinates[1],
+          }}
+          //temperatura = {clickOnMarker(selectedCapital)}
+        >
+          
+          <div>
+            <h2>{selectedCapital.properties.country}</h2>
+            <p>{selectedCapital.properties.city}</p>
+            <p> Temperature: {temp} </p>
+
+          </div>
+        </InfoWindow>
+      )}
+      
+       /*   
       {capitalData.features.map(capital => (
         <Marker
           key={capital.properties.id}
@@ -122,35 +131,15 @@ function Map() {
            onClick={() => {
             setSelectedCapital(capital);                   
           }}
-          icon={{
+          visible= {false} //true if wanna see markers
+          icon={{    
             scaledSize: new window.google.maps.Size(25, 25)
           }}
         />
       ))}
+      */
 
-      {(selectedCapital )&& (
-        
-        
-        <InfoWindow
-          onCloseClick={() => {
-            setSelectedCapital(null);
-          }}
-          position={{
-            lng: selectedCapital.geometry.coordinates[0],
-            lat: selectedCapital.geometry.coordinates[1],
-          }}
-          temperatura = {clickOnMarker(selectedCapital)}
-          
-        >
-          
-          <div>
-            <h2>{selectedCapital.properties.country}</h2>
-            <p>{selectedCapital.properties.city}</p>
-            <p> Temp: {temp} </p>
-
-          </div>
-        </InfoWindow>
-      )}
+      
     </GoogleMap>
   );
 }
