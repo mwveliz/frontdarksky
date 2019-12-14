@@ -28,6 +28,7 @@ Geocode.enableDebug();
 function Map() {
   const [selectedCapital, setSelectedCapital] = useState(null);
   const [temp, setTemp] = useState(null);
+  const [season, setSeason] = useState(null);
  
     useEffect(() => {
     const listener = e => {
@@ -41,8 +42,16 @@ function Map() {
       window.removeEventListener("keydown", listener);
     };
   }, []);
-      
     
+    // get the season taking month of the year and latitude, consider equator as south
+    const getSeason = (latitude) =>{
+        const d = new Date()
+        let s= ['Summer', 'Autumn', 'Winter', 'Spring'][Math.floor((d.getMonth() / 12 * 4)) % 4]
+        if (latitude>0){  //north hemisphere
+            s = ['Winter', 'Spring', 'Summer', 'Autumn'][Math.floor((d.getMonth() / 12 * 4)) % 4]
+        }
+      return s; 
+    }
 
     const handleClick = (event) => {
     const late = event.latLng.lat().toFixed(2);
@@ -57,7 +66,8 @@ function Map() {
               (item) => item.id === countryCode) //Extract the countrycode 
         const lat = geometryClicked[0]['geometry']['coordinates'][1]
         const lon = geometryClicked[0]['geometry']['coordinates'][0]  
-        
+        const season = getSeason(lat);
+        setSeason(season)    
         fetch(`http://localhost:5000/darksky/${lon}/${lat}`)
         .then(res => res.json())
         .then((data) => {
@@ -112,9 +122,10 @@ function Map() {
         >
           
           <div>
-            <h2>{selectedCapital.properties.country}</h2>
-            <p>{selectedCapital.properties.city}</p>
+            <h2>Country: {selectedCapital.properties.country}</h2>
+            <p>Capital: {selectedCapital.properties.city}</p>
             <p> Temperature: {temp} </p>
+            <p> Season: {season} </p>
 
           </div>
         </InfoWindow>

@@ -1,5 +1,13 @@
 # Frontend for darksky
 
-npm install
+    $ git clone https://github.com/mwveliz/frontdarksky.git
+    $ cd PROJECT
+    $ npm install
 
-npm start
+## Start & watch
+
+    $ npm start
+
+## Simple build for production
+
+    $ npm run build
