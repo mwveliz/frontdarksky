@@ -68,7 +68,7 @@ function Map() {
         const lon = geometryClicked[0]['geometry']['coordinates'][0]  
         const season = getSeason(lat);
         setSeason(season)    
-        fetch(`http://localhost:5000/darksky/${lon}/${lat}`)
+        fetch(`http://ec2-3-210-181-109.compute-1.amazonaws.com:5000/darksky/${lon}/${lat}`)
         .then(res => res.json())
         .then((data) => {
             setTemp(data.temp)  ;
@@ -86,7 +86,7 @@ function Map() {
     const clickOnMarker = (selectedCapital) =>{
     const lat = selectedCapital.geometry.coordinates[1]
     const lon = selectedCapital.geometry.coordinates[0]  
-   axios.get(`http://localhost:5000/darksky/${lon}/${lat}`,{ 'Content-Type': 'application/json',crossdomain: true })
+   axios.get(`http://ec2-3-210-181-109.compute-1.amazonaws.com:5000/darksky/${lon}/${lat}`,{ 'Content-Type': 'application/json',crossdomain: true })
     .then(res => {
        const t = res.data;   
         setTemp(t.temp)  
