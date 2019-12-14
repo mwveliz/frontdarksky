@@ -8,6 +8,7 @@
     "react-async": "^10.0.0",
     "react-cache": "^2.0.0-alpha.1",
     "react-dom": "^16.8.6",
+    "react-geocode": "^0.2.1",
     "react-google-maps": "^9.4.5",
     "react-scripts": "2.1.8"
   },

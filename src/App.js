@@ -10,6 +10,22 @@ import {
 import * as capitalData from "./data/capitals.json";
 import mapStyles from "./mapStyles";
 import axios from 'axios';
+import Geocode from 'react-geocode';
+
+// set Google Maps Geocoding API for purposes of quota management. Its optional but recommended.
+Geocode.setApiKey("AIzaSyDPDmmOae3HvK1VGfKIu_fZEADkcfzh8gc");
+
+// set response language. Defaults to english.
+Geocode.setLanguage("es");
+
+// set response region. Its optional.
+// A Geocoding request with region=es (Spain) will return the Spanish city.
+//Geocode.setRegion("es");
+
+// Enable or disable logs. Its optional.
+Geocode.enableDebug();
+
+
 
 function Map() {
   const [selectedCapital, setSelectedCapital] = useState(null);
@@ -27,15 +43,36 @@ function Map() {
       window.removeEventListener("keydown", listener);
     };
   }, []);
+      
+    
 
     const handleClick = (event) => {
     const late = event.latLng.lat().toFixed(2);
     const lone = event.latLng.lng().toFixed(2);
-    fetch(`http://localhost:5000/darksky/${lone}/${late}`)
+    // Get address from latidude & longitude.
+    Geocode.fromLatLng(late.toString(), lone.toString()).then(  
+        response => {
+        const aCs = response.results[0].address_components;
+        const types = aCs.filter((aC) => aC.types[0] =='country');
+        const countryCode = types.shortname;
+        alert(countryCode)
+        const geometryClicked = capitalData.features.filter(
+              (item) => item.id === countryCode) //Extract the countrycode 
+        alert(JSON.stringify(geometryClicked));
+        const lat = geometryClicked.coordinates[1]
+        const lon = geometryClicked.coordinates[0]  
+   
+        fetch(`http://localhost:5000/darksky/${lon}/${lat}`)
         .then(res => res.json())
         .then((data) => this.setState({ temp: data.temperature }))
-        .catch(console.log)
-      };
+        .catch(console.log)       
+        },
+        error => {
+          console.error(error);
+         }
+       );
+    };  
+    
     
    const buscatemp = (capital) =>{
     const lat = capital.geometry.coordinates[1]
@@ -124,7 +161,7 @@ export default function App() {
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <MapWrapped
-        googleMapURL='https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=AIzaSyAcjmpUPjxBN4YtFdzorpA5U2SRiZ1bnds'
+        googleMapURL='https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=AIzaSyDPDmmOae3HvK1VGfKIu_fZEADkcfzh8gc'
         loadingElement={<div style={{ height: `100%` }} />}
         containerElement={<div style={{ height: `100%` }} />}
         mapElement={<div style={{ height: `100%` }} />}
