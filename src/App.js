@@ -68,7 +68,7 @@ function Map() {
         const lon = geometryClicked[0]['geometry']['coordinates'][0]  
         const season = getSeason(lat);
         setSeason(season)    
-        fetch(`http://ec2-54-89-177-25.compute-1.amazonaws.com/api/darksky/${lon}/${lat}`)
+        fetch(`http://localhost/api/darksky/${lon}/${lat}`)
         .then(res => res.json())
         .then((data) => {
             setTemp(data.temp)  ;
